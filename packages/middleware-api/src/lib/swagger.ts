@@ -1,4 +1,4 @@
-import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerJSDoc from 'swagger-jsdoc'
 
 const swaggerOptions: swaggerJSDoc.Options = {
   definition: {
@@ -128,7 +128,7 @@ const swaggerOptions: swaggerJSDoc.Options = {
               minimum: 0,
               nullable: true,
               description: 'Preço de venda',
-              example: 12.50,
+              example: 12.5,
             },
             custo: {
               type: 'number',
@@ -136,7 +136,7 @@ const swaggerOptions: swaggerJSDoc.Options = {
               minimum: 0,
               nullable: true,
               description: 'Custo do produto',
-              example: 8.00,
+              example: 8.0,
             },
             peso: {
               type: 'number',
@@ -144,7 +144,7 @@ const swaggerOptions: swaggerJSDoc.Options = {
               minimum: 0,
               nullable: true,
               description: 'Peso em kg',
-              example: 0.050,
+              example: 0.05,
             },
             dimensoes: {
               type: 'object',
@@ -250,21 +250,21 @@ const swaggerOptions: swaggerJSDoc.Options = {
               format: 'decimal',
               minimum: 0,
               description: 'Preço de venda',
-              example: 12.50,
+              example: 12.5,
             },
             custo: {
               type: 'number',
               format: 'decimal',
               minimum: 0,
               description: 'Custo do produto',
-              example: 8.00,
+              example: 8.0,
             },
             peso: {
               type: 'number',
               format: 'decimal',
               minimum: 0,
               description: 'Peso em kg',
-              example: 0.050,
+              example: 0.05,
             },
             dimensoes: {
               type: 'object',
@@ -351,21 +351,21 @@ const swaggerOptions: swaggerJSDoc.Options = {
               format: 'decimal',
               minimum: 0,
               description: 'Preço de venda',
-              example: 12.50,
+              example: 12.5,
             },
             custo: {
               type: 'number',
               format: 'decimal',
               minimum: 0,
               description: 'Custo do produto',
-              example: 8.00,
+              example: 8.0,
             },
             peso: {
               type: 'number',
               format: 'decimal',
               minimum: 0,
               description: 'Peso em kg',
-              example: 0.050,
+              example: 0.05,
             },
             dimensoes: {
               type: 'object',
@@ -508,13 +508,10 @@ const swaggerOptions: swaggerJSDoc.Options = {
       },
     ],
   },
-  apis: [
-    './src/pages/api/**/*.ts',
-    './src/pages/api/**/*.js',
-  ],
-};
+  apis: ['./src/pages/api/**/*.ts', './src/pages/api/**/*.js'],
+}
 
-export const swaggerSpec = swaggerJSDoc(swaggerOptions);
+export const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
 // Export helper functions for common responses
 export const swaggerResponses = {
@@ -590,4 +587,4 @@ export const swaggerResponses = {
       },
     },
   },
-};
+}

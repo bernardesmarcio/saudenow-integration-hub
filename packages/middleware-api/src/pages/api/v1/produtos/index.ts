@@ -1,9 +1,9 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { produtoService } from '../../../../services/core/produtoService';
+import { NextApiRequest, NextApiResponse } from 'next'
+import { produtoService } from '../../../../services/core/produtoService'
 import {
   validateProductCreate,
   validateProductListQuery,
-} from '../../../../lib/validation/productValidator';
+} from '../../../../lib/validation/productValidator'
 import {
   asyncHandler,
   sendSuccess,
@@ -11,9 +11,11 @@ import {
   ValidationError,
   validateMethod,
   validateContentType,
-  composeMiddleware,
-} from '../../../../lib/middleware/errorMiddleware';
-import { getCorsMiddleware, requestLogger } from '../../../../lib/middleware/corsMiddleware';
+} from '../../../../lib/middleware/errorMiddleware'
+import {
+  getCorsMiddleware,
+  requestLogger,
+} from '../../../../lib/middleware/corsMiddleware'
 
 /**
  * @swagger
@@ -199,64 +201,67 @@ import { getCorsMiddleware, requestLogger } from '../../../../lib/middleware/cor
  *         $ref: '#/components/responses/500'
  */
 
-const corsMiddleware = getCorsMiddleware();
+const corsMiddleware = getCorsMiddleware()
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Apply CORS
-  corsMiddleware(req, res, () => {});
+  corsMiddleware(req, res, () => {})
 
   // Apply request logging
-  requestLogger(req, res, () => {});
+  requestLogger(req, res, () => {})
 
   // Validate HTTP method
-  validateMethod(['GET', 'POST'])(req, res, () => {});
+  validateMethod(['GET', 'POST'])(req, res, () => {})
 
   if (req.method === 'GET') {
-    return await handleGetProdutos(req, res);
+    return await handleGetProdutos(req, res)
   } else if (req.method === 'POST') {
-    return await handleCreateProduto(req, res);
+    return await handleCreateProduto(req, res)
   }
 }
 
 // Handle GET /api/v1/produtos - List products
 async function handleGetProdutos(req: NextApiRequest, res: NextApiResponse) {
   // Validate query parameters
-  const validation = validateProductListQuery(req.query);
+  const validation = validateProductListQuery(req.query)
   if (!validation.success) {
-    throw new ValidationError('Parâmetros de consulta inválidos', validation.errors);
+    throw new ValidationError(
+      'Parâmetros de consulta inválidos',
+      validation.errors
+    )
   }
 
-  const query = validation.data;
+  const query = validation.data
 
   // Get products from service
-  const result = await produtoService.list(query);
+  const result = await produtoService.list(query)
 
   // Send response
   sendSuccess(res, result.produtos, undefined, {
     count: result.total,
     page: query.page,
     limit: query.limit,
-  });
+  })
 }
 
 // Handle POST /api/v1/produtos - Create product
 async function handleCreateProduto(req: NextApiRequest, res: NextApiResponse) {
   // Validate content type
-  validateContentType(req, res, () => {});
+  validateContentType(req, res, () => {})
 
   // Validate request body
-  const validation = validateProductCreate(req.body);
+  const validation = validateProductCreate(req.body)
   if (!validation.success) {
-    throw new ValidationError('Dados do produto inválidos', validation.errors);
+    throw new ValidationError('Dados do produto inválidos', validation.errors)
   }
 
-  const productData = validation.data;
+  const productData = validation.data
 
   // Create product
-  const produto = await produtoService.create(productData);
+  const produto = await produtoService.create(productData)
 
   // Send response
-  sendCreated(res, produto, 'Produto criado com sucesso');
+  sendCreated(res, produto, 'Produto criado com sucesso')
 }
 
-export default asyncHandler(handler);
+export default asyncHandler(handler)

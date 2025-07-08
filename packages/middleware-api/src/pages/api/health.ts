@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next'
 
 /**
  * @swagger
@@ -35,17 +35,17 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
-    res.setHeader('Allow', ['GET']);
+    res.setHeader('Allow', ['GET'])
     return res.status(405).json({
       status: 'error',
       message: 'Método não permitido',
-    });
+    })
   }
 
   // Set cache headers
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+  res.setHeader('Pragma', 'no-cache')
+  res.setHeader('Expires', '0')
 
   res.status(200).json({
     status: 'ok',
@@ -55,5 +55,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
     port: process.env.PORT || 3001,
-  });
+  })
 }

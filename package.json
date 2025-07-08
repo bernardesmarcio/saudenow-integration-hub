@@ -22,7 +22,12 @@
     "type-check": "turbo run type-check",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build lint test && changeset publish"
+    "release": "turbo run build lint test && changeset publish",
+    "start:dev": "./scripts/start-dev.sh",
+    "stop:dev": "./scripts/stop-dev.sh",
+    "redis:start": "docker-compose up -d redis",
+    "redis:stop": "docker-compose stop redis",
+    "redis:logs": "docker-compose logs -f redis"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",

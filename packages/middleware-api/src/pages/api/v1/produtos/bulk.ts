@@ -1,14 +1,17 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { produtoService } from '../../../../services/core/produtoService';
-import { validateProductBulkCreate } from '../../../../lib/validation/productValidator';
+import { NextApiRequest, NextApiResponse } from 'next'
+import { produtoService } from '../../../../services/core/produtoService'
+import { validateProductBulkCreate } from '../../../../lib/validation/productValidator'
 import {
   asyncHandler,
   sendSuccess,
   ValidationError,
   validateMethod,
   validateContentType,
-} from '../../../../lib/middleware/errorMiddleware';
-import { getCorsMiddleware, requestLogger } from '../../../../lib/middleware/corsMiddleware';
+} from '../../../../lib/middleware/errorMiddleware'
+import {
+  getCorsMiddleware,
+  requestLogger,
+} from '../../../../lib/middleware/corsMiddleware'
 
 /**
  * @swagger
@@ -102,53 +105,61 @@ import { getCorsMiddleware, requestLogger } from '../../../../lib/middleware/cor
  *         $ref: '#/components/responses/500'
  */
 
-const corsMiddleware = getCorsMiddleware();
+const corsMiddleware = getCorsMiddleware()
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Apply CORS
-  corsMiddleware(req, res, () => {});
+  corsMiddleware(req, res, () => {})
 
   // Apply request logging
-  requestLogger(req, res, () => {});
+  requestLogger(req, res, () => {})
 
   // Validate HTTP method
-  validateMethod(['POST'])(req, res, () => {});
+  validateMethod(['POST'])(req, res, () => {})
 
   if (req.method === 'POST') {
-    return await handleBulkCreateProdutos(req, res);
+    return await handleBulkCreateProdutos(req, res)
   }
 }
 
 // Handle POST /api/v1/produtos/bulk - Bulk create products
-async function handleBulkCreateProdutos(req: NextApiRequest, res: NextApiResponse) {
+async function handleBulkCreateProdutos(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // Validate content type
-  validateContentType(req, res, () => {});
+  validateContentType(req, res, () => {})
 
   // Validate request body
-  const validation = validateProductBulkCreate(req.body);
+  const validation = validateProductBulkCreate(req.body)
   if (!validation.success) {
-    throw new ValidationError('Dados para criação em lote inválidos', validation.errors);
+    throw new ValidationError(
+      'Dados para criação em lote inválidos',
+      validation.errors
+    )
   }
 
-  const { produtos } = validation.data;
+  const { produtos } = validation.data
 
   // Log the bulk operation start
-  console.log(`Iniciando criação em lote de ${produtos.length} produtos`);
+  console.log(`Iniciando criação em lote de ${produtos.length} produtos`)
 
   // Process bulk creation
-  const result = await produtoService.bulkCreate(produtos);
+  const result = await produtoService.bulkCreate(produtos)
 
   // Log the result
-  console.log(`Criação em lote concluída: ${result.success} sucessos, ${result.failed} falhas`);
+  console.log(
+    `Criação em lote concluída: ${result.success} sucessos, ${result.failed} falhas`
+  )
 
   // Generate response message
-  let message = `Processamento em lote concluído: ${result.success} sucessos`;
+  let message = `Processamento em lote concluído: ${result.success} sucessos`
   if (result.failed > 0) {
-    message += `, ${result.failed} falhas`;
+    message += `, ${result.failed} falhas`
   }
 
   // Send response
-  sendSuccess(res, result, message);
+  sendSuccess(res, result, message)
 }
 
-export default asyncHandler(handler);
+export default asyncHandler(handler)

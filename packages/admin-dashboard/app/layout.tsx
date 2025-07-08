@@ -1,3 +1,5 @@
+import './globals-simple.css'
+
 export default function RootLayout({
   children,
 }: {
@@ -5,7 +7,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        {children}
+      </body>
     </html>
   )
 }

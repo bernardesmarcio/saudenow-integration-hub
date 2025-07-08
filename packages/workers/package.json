@@ -5,7 +5,8 @@
   "description": "Background workers para processamento de jobs",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/index.dev.ts",
+    "dev:full": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "build": "tsc",
     "test": "jest",
@@ -16,6 +17,7 @@
     "redis:down": "docker-compose down",
     "redis:logs": "docker-compose logs -f redis",
     "test:sap": "tsx scripts/test-sap.ts",
+    "test:retail-pro": "tsx scripts/test-retail-pro.ts",
     "start:local": "node scripts/start-local.js"
   },
   "dependencies": {

@@ -3,7 +3,7 @@ import { logger } from '../lib/logger';
 
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
-// Main Redis connection
+// Main Redis connection (for general use, not Bull Queue)
 export const redis = new Redis(redisUrl, {
   retryStrategy: (times) => {
     const delay = Math.min(times * 100, 3000);
@@ -23,11 +23,12 @@ export const redis = new Redis(redisUrl, {
   },
 });
 
-// Create new Redis connection for specific purposes
+// Create new Redis connection for specific purposes (Bull Queue compatible)
 export const createRedisConnection = (purpose?: string) => {
   const connection = new Redis(redisUrl, {
     retryStrategy: (times) => Math.min(times * 100, 3000),
-    maxRetriesPerRequest: 3,
+    maxRetriesPerRequest: null, // Bull Queue requires this to be null
+    enableReadyCheck: false,    // Bull Queue requires this to be false
     lazyConnect: true,
   });
 

@@ -1,9 +1,9 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { produtoService } from '../../../../services/core/produtoService';
+import { NextApiRequest, NextApiResponse } from 'next'
+import { produtoService } from '../../../../services/core/produtoService'
 import {
   validateProductUpdate,
   validateUUID,
-} from '../../../../lib/validation/productValidator';
+} from '../../../../lib/validation/productValidator'
 import {
   asyncHandler,
   sendSuccess,
@@ -12,8 +12,11 @@ import {
   NotFoundError,
   validateMethod,
   validateContentType,
-} from '../../../../lib/middleware/errorMiddleware';
-import { getCorsMiddleware, requestLogger } from '../../../../lib/middleware/corsMiddleware';
+} from '../../../../lib/middleware/errorMiddleware'
+import {
+  getCorsMiddleware,
+  requestLogger,
+} from '../../../../lib/middleware/corsMiddleware'
 
 /**
  * @swagger
@@ -143,81 +146,93 @@ import { getCorsMiddleware, requestLogger } from '../../../../lib/middleware/cor
  *         $ref: '#/components/responses/500'
  */
 
-const corsMiddleware = getCorsMiddleware();
+const corsMiddleware = getCorsMiddleware()
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Apply CORS
-  corsMiddleware(req, res, () => {});
+  corsMiddleware(req, res, () => {})
 
   // Apply request logging
-  requestLogger(req, res, () => {});
+  requestLogger(req, res, () => {})
 
   // Validate HTTP method
-  validateMethod(['GET', 'PUT', 'DELETE'])(req, res, () => {});
+  validateMethod(['GET', 'PUT', 'DELETE'])(req, res, () => {})
 
   // Validate and extract ID from path
-  const { id } = req.query;
-  const idValidation = validateUUID(id);
+  const { id } = req.query
+  const idValidation = validateUUID(id)
   if (!idValidation.success) {
-    throw new ValidationError('ID do produto inválido', idValidation.errors);
+    throw new ValidationError('ID do produto inválido', idValidation.errors)
   }
 
-  const productId = idValidation.data;
+  const productId = idValidation.data
 
   if (req.method === 'GET') {
-    return await handleGetProduto(productId, req, res);
+    return await handleGetProduto(productId, req, res)
   } else if (req.method === 'PUT') {
-    return await handleUpdateProduto(productId, req, res);
+    return await handleUpdateProduto(productId, req, res)
   } else if (req.method === 'DELETE') {
-    return await handleDeleteProduto(productId, req, res);
+    return await handleDeleteProduto(productId, req, res)
   }
 }
 
 // Handle GET /api/v1/produtos/[id] - Get product by ID
-async function handleGetProduto(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function handleGetProduto(
+  id: string,
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // Get product from service
-  const produto = await produtoService.getById(id);
+  const produto = await produtoService.getById(id)
 
   if (!produto) {
-    throw new NotFoundError('Produto não encontrado');
+    throw new NotFoundError('Produto não encontrado')
   }
 
   // Send response
-  sendSuccess(res, produto);
+  sendSuccess(res, produto)
 }
 
 // Handle PUT /api/v1/produtos/[id] - Update product
-async function handleUpdateProduto(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function handleUpdateProduto(
+  id: string,
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // Validate content type
-  validateContentType(req, res, () => {});
+  validateContentType(req, res, () => {})
 
   // Validate request body
-  const validation = validateProductUpdate(req.body);
+  const validation = validateProductUpdate(req.body)
   if (!validation.success) {
-    throw new ValidationError('Dados do produto inválidos', validation.errors);
+    throw new ValidationError('Dados do produto inválidos', validation.errors)
   }
 
-  const updateData = validation.data;
+  const updateData = validation.data
 
   // Check if there's something to update
   if (Object.keys(updateData).length === 0) {
-    throw new ValidationError('Nenhum campo para atualizar foi fornecido');
+    throw new ValidationError('Nenhum campo para atualizar foi fornecido')
   }
 
   // Update product
-  const produto = await produtoService.update(id, updateData);
+  const produto = await produtoService.update(id, updateData)
 
   // Send response
-  sendSuccess(res, produto, 'Produto atualizado com sucesso');
+  sendSuccess(res, produto, 'Produto atualizado com sucesso')
 }
 
 // Handle DELETE /api/v1/produtos/[id] - Delete product
-async function handleDeleteProduto(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function handleDeleteProduto(
+  id: string,
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // Delete product
-  await produtoService.delete(id);
+  await produtoService.delete(id)
 
   // Send response
-  sendNoContent(res);
+  sendNoContent(res)
 }
 
-export default asyncHandler(handler);
+export default asyncHandler(handler)
