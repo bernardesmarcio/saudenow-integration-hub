@@ -1,0 +1,33 @@
+{
+  "name": "saudenow-admin-dashboard",
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "NEXT_PUBLIC_API_URL": "@api_url",
+    "NEXT_PUBLIC_WORKERS_URL": "@workers_url"
+  },
+  "functions": {
+    "app/**/*.{js,ts,tsx}": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://seu-middleware-api.railway.app/api/:path*"
+    }
+  ]
+}

@@ -5,13 +5,50 @@ import { isRedisHealthy } from './config/redis';
 import { isDatabaseHealthy } from './config/database';
 import logger from './lib/logger';
 import environment from './config/environment';
+import express from 'express';
 
 class WorkerManager {
   private sapScheduler: SapScheduler;
   private isShuttingDown = false;
+  private healthServer: express.Application;
 
   constructor() {
     this.sapScheduler = new SapScheduler();
+    this.healthServer = express();
+    this.setupHealthEndpoints();
+  }
+
+  private setupHealthEndpoints(): void {
+    this.healthServer.get('/health', async (req, res) => {
+      try {
+        const redisHealthy = await isRedisHealthy();
+        const dbHealthy = await isDatabaseHealthy();
+        
+        const status = {
+          status: 'ok',
+          timestamp: new Date().toISOString(),
+          services: {
+            redis: redisHealthy ? 'healthy' : 'unhealthy',
+            database: dbHealthy ? 'healthy' : 'unhealthy',
+            workers: !this.isShuttingDown ? 'running' : 'shutting_down'
+          },
+          schedulers: this.sapScheduler.getStatus()
+        };
+
+        const isHealthy = redisHealthy && dbHealthy && !this.isShuttingDown;
+        res.status(isHealthy ? 200 : 503).json(status);
+      } catch (error) {
+        res.status(503).json({
+          status: 'error',
+          timestamp: new Date().toISOString(),
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    });
+
+    this.healthServer.get('/status', (req, res) => {
+      res.json(this.getStatus());
+    });
   }
 
   async start(): Promise<void> {
@@ -36,6 +73,12 @@ class WorkerManager {
       } catch (error) {
         logger.warn('Webhook server failed to start (optional):', error);
       }
+
+      // Start health check server
+      logger.info('Starting health check server...');
+      this.healthServer.listen(4000, () => {
+        logger.info('Health check server listening on port 4000');
+      });
       
       // Setup graceful shutdown
       this.setupGracefulShutdown();
