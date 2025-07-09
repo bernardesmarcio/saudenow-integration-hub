@@ -11,7 +11,7 @@ rootDirectory = "."
 [services.middleware-api.build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.middleware-api"
-# buildCommand vazio para usar o Dockerfile
+buildCommand = "docker build -f Dockerfile.middleware-api -t middleware-api ."
 
 [services.middleware-api.deploy]
 # startCommand vazio para usar o CMD do Dockerfile
@@ -33,7 +33,7 @@ rootDirectory = "."
 [services.workers.build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.workers"
-# buildCommand vazio para usar o Dockerfile
+buildCommand = "docker build -f Dockerfile.workers -t workers ."
 
 [services.workers.deploy]
 # startCommand vazio para usar o CMD do Dockerfile
