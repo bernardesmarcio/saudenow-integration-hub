@@ -6,11 +6,10 @@
 
 # Middleware Service (Next.js API)
 [services.middleware-api]
-rootDirectory = "."
-
 [services.middleware-api.build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.middleware-api"
+# buildCommand vazio para usar o Dockerfile
 
 [services.middleware-api.deploy]
 # startCommand vazio para usar o CMD do Dockerfile
@@ -27,11 +26,10 @@ retries = 3
 
 # Workers Service (Background Jobs)
 [services.workers]
-rootDirectory = "."
-
 [services.workers.build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.workers"
+# buildCommand vazio para usar o Dockerfile
 
 [services.workers.deploy]
 # startCommand vazio para usar o CMD do Dockerfile
