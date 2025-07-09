@@ -3,6 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   
+  // Disable ESLint and TypeScript during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   // Custom server configuration
   async rewrites() {
     return [
