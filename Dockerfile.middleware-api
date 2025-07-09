@@ -1,47 +1,66 @@
 # Dockerfile - Middleware API
-FROM node:18-alpine
+FROM node:18-alpine AS base
 
 # Install dependencies
 RUN apk add --no-cache libc6-compat curl
 
-# Set working directory
+# Dependencies stage
+FROM base AS deps
 WORKDIR /app
 
 # Copy package files for monorepo context
 COPY package*.json ./
 COPY turbo.json ./
-
-# Copy middleware-api specific files
 COPY packages/middleware-api/package*.json ./packages/middleware-api/
-COPY packages/middleware-api/next.config.js ./packages/middleware-api/
-COPY packages/middleware-api/tsconfig.json ./packages/middleware-api/
 
-# Install dependencies at root level (for monorepo) including devDependencies for TypeScript
+# Install dependencies including devDependencies for TypeScript
 RUN npm install --include=dev
 
-# Copy all source code (monorepo needs full context)
+# Builder stage
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/middleware-api/node_modules ./packages/middleware-api/node_modules
+
+# Copy source code
 COPY packages/middleware-api ./packages/middleware-api
+COPY turbo.json ./
 
-# Set environment variables for Railway
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-# Railway provides PORT environment variable automatically
-ENV PORT=${PORT:-3001}
-
-# Change to middleware-api directory and build
+# Build the application
 WORKDIR /app/packages/middleware-api
 RUN npm run build
 
-# Expose the port that Railway expects
-EXPOSE $PORT
+# Runtime stage
+FROM base AS runner
+WORKDIR /app
 
-# Health check to ensure service is running
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=8080
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built application from builder stage
+COPY --from=builder /app/packages/middleware-api/.next/standalone ./
+COPY --from=builder /app/packages/middleware-api/.next/static ./.next/static
+COPY --from=builder /app/packages/middleware-api/public ./public
+
+# Set correct permissions
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Expose port
+EXPOSE 8080
+
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:$PORT/api/health || exit 1
+  CMD curl -f http://localhost:8080/api/health || exit 1
 
-# Copy start script
-COPY packages/middleware-api/start.sh ./start.sh
-RUN chmod +x ./start.sh
-
-# Start the application using custom script
-CMD ["./start.sh"]
+# Start the standalone server
+CMD ["node", "server.js"]
