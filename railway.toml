@@ -6,6 +6,8 @@
 
 # Middleware Service (Next.js API)
 [services.middleware-api]
+rootDirectory = "."
+
 [services.middleware-api.build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.middleware-api"
@@ -26,6 +28,8 @@ retries = 3
 
 # Workers Service (Background Jobs)
 [services.workers]
+rootDirectory = "."
+
 [services.workers.build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.workers"
