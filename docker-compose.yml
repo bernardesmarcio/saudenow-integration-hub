@@ -1,6 +1,54 @@
 version: '3.8'
 
 services:
+  # Middleware API (Next.js)
+  middleware-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.middleware-api
+    container_name: saudenow-middleware-api
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - REDIS_URL=redis://redis:6379
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Workers (Background Jobs)
+  workers:
+    build:
+      context: .
+      dockerfile: Dockerfile.workers
+    container_name: saudenow-workers
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - REDIS_URL=redis://redis:6379
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    depends_on:
+      - redis
+      - middleware-api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Redis (Cache & Queue)
   redis:
     image: redis:7-alpine
     container_name: saudenow-redis

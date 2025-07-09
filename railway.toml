@@ -1,0 +1,41 @@
+# Railway Configuration for Multiple Services
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+
+# Middleware Service (Next.js API)
+[services.middleware-api]
+rootDirectory = "."
+dockerfilePath = "Dockerfile.middleware-api"
+startCommand = "node server.js"
+port = 8080
+
+[services.middleware-api.healthcheck]
+path = "/api/health"
+interval = 30
+timeout = 5
+retries = 3
+
+[services.middleware-api.deploy]
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Workers Service (Background Jobs)
+[services.workers]
+rootDirectory = "."
+dockerfilePath = "Dockerfile.workers"
+startCommand = "npm start"
+port = 4000
+
+[services.workers.healthcheck]
+path = "/health"
+interval = 30
+timeout = 5
+retries = 3
+
+[services.workers.deploy]
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
