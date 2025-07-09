@@ -20,9 +20,8 @@ RUN npm install --include=dev
 FROM base AS builder
 WORKDIR /app
 
-# Copy dependencies
+# Copy dependencies (monorepo - tudo na raiz)
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/middleware-api/node_modules ./packages/middleware-api/node_modules
 
 # Copy source code
 COPY packages/middleware-api ./packages/middleware-api
