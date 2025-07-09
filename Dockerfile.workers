@@ -1,36 +1,64 @@
 # Dockerfile - Workers
-FROM node:18-alpine
+FROM node:18-alpine AS base
 
 # Install dependencies
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl
 
-# Set working directory
+# Dependencies stage
+FROM base AS deps
 WORKDIR /app
 
 # Copy package files for monorepo context
 COPY package*.json ./
 COPY turbo.json ./
-
-# Copy workers specific files
 COPY packages/workers/package*.json ./packages/workers/
-COPY packages/workers/tsconfig.json ./packages/workers/
 
-# Install dependencies at root level (for monorepo) including devDependencies for TypeScript
+# Install dependencies including devDependencies for TypeScript
 RUN npm install --include=dev
 
-# Copy workers source code
+# Builder stage
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies (monorepo - tudo na raiz)
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
 COPY packages/workers ./packages/workers
+COPY turbo.json ./
+
+# Build the application
+WORKDIR /app/packages/workers
+RUN npm run build
+
+# Runtime stage
+FROM base AS runner
+WORKDIR /app
 
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=4000
 
-# Change to workers directory and build
-WORKDIR /app/packages/workers
-RUN npm run build
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 worker
+
+# Copy runtime dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy built application from builder stage
+COPY --from=builder /app/packages/workers/dist ./dist
+
+# Set correct permissions
+RUN chown -R worker:nodejs /app
+USER worker
 
 # Expose port
 EXPOSE 4000
 
-# Start the application
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4000/health || exit 1
+
+# Start the workers
 CMD ["npm", "start"]
