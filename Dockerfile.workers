@@ -1,42 +1,36 @@
 # Dockerfile - Workers
-FROM node:18-alpine AS base
+FROM node:18-alpine
 
-# Install dependencies only when needed
-FROM base AS deps
+# Install dependencies
 RUN apk add --no-cache libc6-compat
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files for monorepo context
 COPY package*.json ./
+COPY turbo.json ./
+
+# Copy workers specific files
 COPY packages/workers/package*.json ./packages/workers/
-RUN npm ci --only=production
+COPY packages/workers/tsconfig.json ./packages/workers/
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Install dependencies at root level (for monorepo) including devDependencies for TypeScript
+RUN npm install --include=dev
 
-# Build the workers
+# Copy workers source code
+COPY packages/workers ./packages/workers
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=4000
+
+# Change to workers directory and build
 WORKDIR /app/packages/workers
 RUN npm run build
 
-# Production image
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 worker
-
-# Copy built application
-COPY --from=builder /app/packages/workers/dist ./dist
-COPY --from=builder /app/packages/workers/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-
-USER worker
-
+# Expose port
 EXPOSE 4000
 
-CMD ["node", "dist/index.js"]
+# Start the application
+CMD ["npm", "start"]

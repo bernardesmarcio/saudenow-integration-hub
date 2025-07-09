@@ -1,45 +1,38 @@
 # Dockerfile - Middleware API
-FROM node:18-alpine AS base
+FROM node:18-alpine
 
-# Install dependencies only when needed
-FROM base AS deps
+# Install dependencies
 RUN apk add --no-cache libc6-compat
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files for monorepo context
 COPY package*.json ./
+COPY turbo.json ./
+
+# Copy middleware-api specific files
 COPY packages/middleware-api/package*.json ./packages/middleware-api/
-RUN npm ci --only=production
+COPY packages/middleware-api/next.config.js ./packages/middleware-api/
+COPY packages/middleware-api/tsconfig.json ./packages/middleware-api/
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Install dependencies at root level (for monorepo) including devDependencies for TypeScript
+RUN npm install --include=dev
 
-# Build the middleware-api
+# Copy all source code (monorepo needs full context)
+COPY packages/middleware-api ./packages/middleware-api
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3001
+
+# Change to middleware-api directory and build
 WORKDIR /app/packages/middleware-api
 RUN npm run build
 
-# Production image
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy built application
-COPY --from=builder /app/packages/middleware-api/.next/standalone ./
-COPY --from=builder /app/packages/middleware-api/.next/static ./packages/middleware-api/.next/static
-COPY --from=builder /app/packages/middleware-api/public ./packages/middleware-api/public
-
-USER nextjs
-
+# Expose port
 EXPOSE 3001
 
-ENV PORT=3001
-
-CMD ["node", "packages/middleware-api/server.js"]
+# Start the application
+CMD ["npm", "start"]
