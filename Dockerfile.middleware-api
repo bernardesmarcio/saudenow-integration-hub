@@ -2,7 +2,7 @@
 FROM node:18-alpine
 
 # Install dependencies
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl
 
 # Set working directory
 WORKDIR /app
@@ -22,17 +22,26 @@ RUN npm install --include=dev
 # Copy all source code (monorepo needs full context)
 COPY packages/middleware-api ./packages/middleware-api
 
-# Set environment variables
+# Set environment variables for Railway
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3001
+# Railway provides PORT environment variable automatically
+ENV PORT=${PORT:-3001}
 
 # Change to middleware-api directory and build
 WORKDIR /app/packages/middleware-api
 RUN npm run build
 
-# Expose port
-EXPOSE 3001
+# Expose the port that Railway expects
+EXPOSE $PORT
 
-# Start the application
-CMD ["npm", "start"]
+# Health check to ensure service is running
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:$PORT/api/health || exit 1
+
+# Copy start script
+COPY packages/middleware-api/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
+# Start the application using custom script
+CMD ["./start.sh"]
