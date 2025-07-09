@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../src/components/u
 import { Button } from '../../src/components/ui/button'
 import { Badge } from '../../src/components/ui/badge'
 import { 
-  Activity, 
   AlertTriangle, 
   CheckCircle, 
   Clock,

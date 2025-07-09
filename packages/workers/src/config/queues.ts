@@ -123,6 +123,23 @@ export const notificationQueue = createQueue('notification', {
   },
 });
 
+// Retail Pro Queue - Retail Pro integrations
+export const retailProQueue = createQueue('retail-pro', {
+  defaultJobOptions: {
+    removeOnComplete: 100,
+    removeOnFail: 50,
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 2000,
+    },
+  },
+  rateLimiter: {
+    max: 50,
+    duration: 60000,
+  },
+});
+
 // Queue monitoring
 export const getQueueStats = async () => {
   const queues = {
@@ -131,6 +148,7 @@ export const getQueueStats = async () => {
     'critical-stock': criticalStockQueue,
     'integration': integrationQueue,
     'notification': notificationQueue,
+    'retail-pro': retailProQueue,
   };
 
   const stats: any = {};
@@ -166,6 +184,7 @@ export const cleanQueues = async () => {
     criticalStockQueue,
     integrationQueue,
     notificationQueue,
+    retailProQueue,
   ];
 
   for (const queue of queues) {
@@ -184,6 +203,7 @@ export const closeQueues = async () => {
     criticalStockQueue,
     integrationQueue,
     notificationQueue,
+    retailProQueue,
   ];
 
   await Promise.all(queues.map((queue) => queue.close()));
