@@ -140,6 +140,12 @@ export const config = {
   },
 };
 
+// Debug environment variables in production
+if (process.env.NODE_ENV === 'production') {
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('SUPABASE')));
+}
+
 // Validate required configuration
 const requiredEnvVars = [
   'NEXT_PUBLIC_SUPABASE_URL',
@@ -149,6 +155,8 @@ const requiredEnvVars = [
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
+    console.error(`Missing environment variable: ${envVar}`);
+    console.error('Available env vars:', Object.keys(process.env).length);
     throw new Error(`Missing required environment variable: ${envVar}`);
   }
 }
