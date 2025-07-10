@@ -1,11 +1,5 @@
 providers = ["node"]
 
-[phases.setup]
-nixPkgs = ["nodejs", "npm"]
-
-[phases.install]
-cmd = "npm install"
-
 [phases.build]
 cmd = "npm run build"
 
