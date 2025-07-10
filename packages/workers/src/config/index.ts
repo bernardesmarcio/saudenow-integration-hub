@@ -140,6 +140,9 @@ export const config = {
   },
 };
 
+// Debug: list all available SUPABASE variables
+console.log('All SUPABASE env vars:', Object.keys(process.env).filter(key => key.includes('SUPABASE')));
+
 // Validate required configuration
 const requiredEnvVars = [
   'SUPABASE_URL',
@@ -149,7 +152,10 @@ const requiredEnvVars = [
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
+    console.error(`Missing: ${envVar}`);
     throw new Error(`Missing required environment variable: ${envVar}`);
+  } else {
+    console.log(`Found: ${envVar}`);
   }
 }
 
