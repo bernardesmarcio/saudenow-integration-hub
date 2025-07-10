@@ -1,24 +1,9 @@
 {
-  "services": {
-    "middleware-api": {
-      "build": {
-        "buildCommand": "npm run build"
-      },
-      "deploy": {
-        "startCommand": "npm run start:middleware",
-        "healthcheckPath": "/api/health",
-        "healthcheckTimeout": 300
-      }
-    },
-    "workers": {
-      "build": {
-        "buildCommand": "npm run build"
-      },
-      "deploy": {
-        "startCommand": "npm run start:workers",
-        "healthcheckPath": "/health",
-        "healthcheckTimeout": 300
-      }
-    }
+  "build": {
+    "buildCommand": "npm run build"
+  },
+  "deploy": {
+    "startCommand": "npm run start:middleware",
+    "healthcheckPath": "/api/health"
   }
 }
