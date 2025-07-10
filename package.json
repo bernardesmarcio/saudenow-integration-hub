@@ -25,6 +25,8 @@
     "release": "turbo run build lint test && changeset publish",
     "start:dev": "./scripts/start-dev.sh",
     "stop:dev": "./scripts/stop-dev.sh",
+    "start:middleware": "npm run start --workspace=@saudenow/middleware-api",
+    "start:workers": "npm run start --workspace=@saudenow/workers",
     "redis:start": "docker-compose up -d redis",
     "redis:stop": "docker-compose stop redis",
     "redis:logs": "docker-compose logs -f redis"
