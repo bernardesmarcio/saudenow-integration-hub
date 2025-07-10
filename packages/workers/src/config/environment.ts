@@ -13,7 +13,7 @@ export const environment = {
   isDevelopment: process.env.NODE_ENV === 'development',
 
   // Server
-  PORT: parseInt(process.env.PORT || '3002', 10),
+  PORT: parseInt(process.env.PORT || '4000', 10),
 
   // Database
   database: {
