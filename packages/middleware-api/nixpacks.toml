@@ -1,7 +1,0 @@
-providers = ["node"]
-
-[phases.build]
-cmd = "npm run build"
-
-[start]
-cmd = "npm run start"
