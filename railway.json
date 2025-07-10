@@ -1,0 +1,26 @@
+{
+  "services": {
+    "middleware-api": {
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "Dockerfile.middleware-api",
+        "buildCommand": "docker build -f Dockerfile.middleware-api -t middleware-api ."
+      },
+      "deploy": {
+        "healthcheckPath": "/api/health",
+        "healthcheckTimeout": 300
+      }
+    },
+    "workers": {
+      "build": {
+        "builder": "DOCKERFILE", 
+        "dockerfilePath": "Dockerfile.workers",
+        "buildCommand": "docker build -f Dockerfile.workers -t workers ."
+      },
+      "deploy": {
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 300
+      }
+    }
+  }
+}
