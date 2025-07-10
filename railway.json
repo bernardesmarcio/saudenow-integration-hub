@@ -1,9 +1,9 @@
 {
   "build": {
-    "buildCommand": "npm run build"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile.middleware-api"
   },
   "deploy": {
-    "startCommand": "npm run start:middleware",
     "healthcheckPath": "/api/health"
   }
 }
