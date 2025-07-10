@@ -14,8 +14,8 @@ export const config = {
 
   // Database
   supabase: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    anonKey: process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   },
 
@@ -146,18 +146,19 @@ if (process.env.NODE_ENV === 'production') {
   console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('SUPABASE')));
 }
 
-// Validate required configuration
+// Validate required configuration - check both naming conventions
 const requiredEnvVars = [
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'SUPABASE_SERVICE_ROLE_KEY',
+  { name: 'SUPABASE_URL', fallback: 'NEXT_PUBLIC_SUPABASE_URL' },
+  { name: 'SUPABASE_ANON_KEY', fallback: 'NEXT_PUBLIC_SUPABASE_ANON_KEY' },
+  { name: 'SUPABASE_SERVICE_ROLE_KEY', fallback: null },
 ];
 
 for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    console.error(`Missing environment variable: ${envVar}`);
+  const value = process.env[envVar.name] || (envVar.fallback ? process.env[envVar.fallback] : null);
+  if (!value) {
+    console.error(`Missing environment variable: ${envVar.name}${envVar.fallback ? ` or ${envVar.fallback}` : ''}`);
     console.error('Available env vars:', Object.keys(process.env).length);
-    throw new Error(`Missing required environment variable: ${envVar}`);
+    throw new Error(`Missing required environment variable: ${envVar.name}${envVar.fallback ? ` or ${envVar.fallback}` : ''}`);
   }
 }
 
