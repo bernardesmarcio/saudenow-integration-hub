@@ -1,0 +1,47 @@
+{
+  "name": "saudenow-integration-hub",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Hub de integração para plataforma de saúde Saudenow",
+  "author": "Saudenow Team",
+  "license": "PRIVATE",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "turbo run type-check",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build lint test && changeset publish",
+    "start:dev": "./scripts/start-dev.sh",
+    "stop:dev": "./scripts/stop-dev.sh",
+    "redis:start": "docker-compose up -d redis",
+    "redis:stop": "docker-compose stop redis",
+    "redis:logs": "docker-compose logs -f redis"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@supabase/mcp-server-supabase": "^0.4.5",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "mcp-supabase": "^0.1.0",
+    "prettier": "^3.2.4",
+    "turbo": "^1.11.3",
+    "typescript": "^5.3.3"
+  },
+  "packageManager": "npm@10.8.2"
+}

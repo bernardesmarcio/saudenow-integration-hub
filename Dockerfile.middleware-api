@@ -1,0 +1,68 @@
+# Dockerfile - Middleware API
+FROM node:18-alpine AS base
+
+# Install dependencies
+RUN apk add --no-cache libc6-compat curl
+
+# Dependencies stage
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files for monorepo context
+COPY package*.json ./
+COPY turbo.json ./
+COPY packages/middleware-api/package*.json ./packages/middleware-api/
+
+# Install dependencies including devDependencies for TypeScript
+RUN npm install --include=dev
+
+# Builder stage
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies (monorepo - tudo na raiz)
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY packages/middleware-api ./packages/middleware-api
+COPY turbo.json ./
+
+# Build the application
+WORKDIR /app/packages/middleware-api
+RUN npm run build
+
+# Runtime stage
+FROM base AS runner
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=8080
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy runtime dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy built application from builder stage
+COPY --from=builder /app/packages/middleware-api/.next/standalone ./
+COPY --from=builder /app/packages/middleware-api/.next/static ./.next/static
+COPY --from=builder /app/packages/middleware-api/public ./public
+
+# Set correct permissions
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/api/health || exit 1
+
+# Start the standalone server (Next.js standalone mode)
+CMD ["node", "server.js"]
